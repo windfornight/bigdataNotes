@@ -219,6 +219,29 @@
 			
 七、案例：Java的死锁分析 
 	预习：DeadLock.java
+	什么死锁？线程互相等待
+	
+	诊断问题？找到原因？
+	1、死锁、性能方面问题
+		JDK 提供一个非常强大性能诊断工具: Thread Dump
+		Linux:    kill -3 PID
+		Windows:  在执行Java程序的命令行窗口上，按 ctrl + break（fn+B）
+	
+		一般：正常运行Java程序：RUNNABLE
+		      有问题： BLOCKED
+			   
+	2、OOM：out of memory 
+		诊断工具：Heap Dump
+	
+	
+八、几个注意的问题
+	1、最多问题：写错了（仔细）
+	2、没有启用intel vt-x开关
+	3、vmware虚拟机(vmnet 1 IP地址)
+	4、如何关闭虚拟机？----> 挂起虚拟机
+	5、一共需要安装5台Linux
+		后面四台: (1) Minal Install
+		          (2) bigdata112
 
 
 
