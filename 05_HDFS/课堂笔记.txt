@@ -1,0 +1,277 @@
+
+
+第五章：HDFS
+====================================
+一、HDFS概述
+
+二、操作HDFS
+	1、通过Web Console: 50070、50090
+	2、命令行
+		（1）操作命令  hdfs dfs *****
+			-mkdir  创建目录
+				举例：hdfs dfs -mkdir /aaa
+				      hdfs dfs -mkdir -p /bbb/ccc
+					  -p 表示如果父目录不存在 先创建父目录
+					
+			-ls      查看某个目录
+			-ls -R   查看某个目录，包含子目录
+					 简写: -lsr
+			
+			-put             上传数据  hdfs dfs -put data.txt /input
+			-copyFromLocal   上传数据  hdfs dfs -copyFromLocal data.txt /input
+			-moveFromLocal   上传数据（相当于 ctrl+x 剪切）
+			
+			-copyToLocal     下载数据
+			-get             下载数据
+					
+			-rm    删除目录
+			-rmr   删除目录（包含子目录）
+			hdfs dfs -rmr /tools
+				rmr: DEPRECATED: Please use 'rm -r' instead.
+				
+				日志：
+				18/04/09 21:35:40 INFO fs.TrashPolicyDefault: Namenode trash configuration: Deletion interval = 0 minutes, Emptier interval = 0 minutes.
+				Deleted /tools ---> 成功删除（对比：回收站）
+
+			-getmerge: 把某个目录下的文件先合并，再下载（提高效率）
+						[root@bigdata111 temp]# vi student01.txt
+						[root@bigdata111 temp]# vi student02.txt
+						[root@bigdata111 temp]# hdfs dfs -mkdir /students
+						[root@bigdata111 temp]# hdfs dfs -put student0*.txt /students
+						[root@bigdata111 temp]# hdfs dfs -ls /students
+						[root@bigdata111 temp]# hdfs dfs -getmerge /students ~/temp/allstudent.txt			
+			
+			-cp:  hdfs dfs -cp /input/data.txt /input/data2.txt
+			-mv:  hdfs dfs -cp /input/data.txt /students
+			
+			-count: hdfs dfs -count /students
+							hdfs dfs -count /students
+						   1            2                 29       /students			
+						  目录个数，  文件个数，   文件总计大小	  输入路径
+						  
+			-du 每个文件的大小
+				[root@bigdata111 temp]# hdfs dfs -du /students
+				19  /students/student01.txt
+				10  /students/student02.txt
+					
+			-text、-cat  查看文件的内容
+			       hdfs dfs -cat /students/student01.txt
+					
+			balancer: 平衡操作	
+		
+		（2）管理命令  hdfs dfsadmin *****
+				-report: 输出HDFS的报告(Summary)
+				-safemode: 安全模式
+					[root@bigdata111 temp]# hdfs dfsadmin -safemode
+					Usage: hdfs dfsadmin [-safemode enter | leave | get | wait]
+					[root@bigdata111 temp]# hdfs dfsadmin -safemode get
+					Safe mode is OFF
+					[root@bigdata111 temp]# hdfs dfsadmin -safemode enter
+					Safe mode is ON
+					[root@bigdata111 temp]# hdfs dfs -mkdir /aaaa
+					mkdir: Cannot create directory /aaaa. Name node is in safe mode.
+					[root@bigdata111 temp]# hdfs dfsadmin -safemode leave
+					Safe mode is OFF
+		
+	3、Java程序
+		依赖的jar包：
+			$HADOOP_HOME/share/hadoop/common/*.jar
+			$HADOOP_HOME/share/hadoop/common/lib/*.jar
+			$HADOOP_HOME/share/hadoop/hdfs/*.jar
+			$HADOOP_HOME/share/hadoop/hdfs/lib/*.jar
+	
+	
+		（1）创建一个目录和HDFS的权限
+			  mkdir 
+		
+				先不设置
+				<!--是否开启HDFS的权限检查，默认true-->
+				<property>
+				   <name>dfs.permissions</name>
+				   <value>false</value>
+				</property>	
+
+		（2）上传数据、下载数据
+		（3）获取元信息		
+
+三、HDFS原理解析（画图）    -----> 非常重要
+	NameNode缓存元信息，默认：1000M
+		hadoop-env.sh
+			# The maximum amount of heap to use, in MB. Default is 1000.
+			#export HADOOP_HEAPSIZE=
+			#export HADOOP_NAMENODE_INIT_HEAPSIZE=""
+	 
+	如果内存崩溃，会使用日志进行恢复   ----> Oracle中，这个过程叫实例恢复
+
+	1、数据上传的过程（原理）
+	2、数据下载的过程（原理）
+
+四、HDFS的高级功能
+	1、回收站
+		补充：Oracle的回收站
+			  恢复：闪回（flashback）
+					(1) 闪回表  flashback table
+					(2) 闪回删除  flashback drop
+					(3) 闪回查询 flashback query
+					(4) 闪回事务查询 flashback transaction query   -----> 可以撤销一个已经提交了的事务
+					(5) 闪回数据库 flashback database 
+					(6) 闪回版本查询 flashback verion query
+					(7) 闪回数据归档  flashback data archive
+			
+		HDFS的回收站：默认禁用
+			参数： core-site.xml 
+			单位：分钟
+				<property>
+				   <name>fs.trash.interval</name>
+				   <value>1440</value>
+				</property>
+				
+				
+			没有回收站
+				日志：
+				18/04/09 21:35:40 INFO fs.TrashPolicyDefault: Namenode trash configuration: Deletion interval = 0 minutes, Emptier interval = 0 minutes.
+				Deleted /tools ---> 成功删除（对比：回收站）			
+	
+			回收站
+				Moved: 'hdfs://bigdata111:9000/tools/a.zip' to trash at: hdfs://bigdata111:9000/user/root/.Trash/Current
+				
+				
+			HDFS回收站的本质：ctrl +x 移动到一个隐藏目录
+			查看回收站
+				   hdfs dfs -lsr /user/root/.Trash/Current
+
+			从回收站中恢复
+						   hdfs dfs -cp /user/root/.Trash/Current/tools/a.zip /tools			
+	
+        [-expunge] 清空回收站
+		
+	2、快照：snapshot（是一种备份）
+		本质：cp命令
+	
+		管理命令
+        [-allowSnapshot <snapshotDir>]
+        [-disallowSnapshot <snapshotDir>]
+		
+		操作命令
+        [-createSnapshot <snapshotDir> [<snapshotName>]]
+        [-deleteSnapshot <snapshotDir> <snapshotName>]
+        [-renameSnapshot <snapshotDir> <oldName> <newName>]
+		
+		(*) 默认禁用
+		(*) 针对目录开启快照
+				hdfs dfsadmin -allowSnapshot /students
+		(*) 创建一个备份
+				hdfs dfs -createSnapshot /students backup_student_0411_01
+				
+				日志：Created snapshot /students/.snapshot/backup_student_0411_01
+		
+			hdfs dfs -put student03.txt /students
+			hdfs dfs -createSnapshot /students backup_student_0411_02
+			
+		(*) 对比快照
+			hdfs snapshotDiff /students backup_student_0411_01 backup_student_0411_02
+				M       .
+				+       ./student03.txt
+				
+			hdfs lsSnapshottableDir
+			通过网页查看
+			
+		(*)恢复快照
+                hdfs dfs -cp /input/.snapshot/backup_input_01/data.txt /input
+		
+		
+		补充：Oracle数据库快照: 一般做异步更新
+				create snapshot aaaa as 子查询 更新时间
+		
+			Oracle数据库备份
+				exp、expdp、数据泵 ----> 逻辑备份 导出数据
+				rman: recovery manager
+			
+
+	3、配额（quota）
+		（1）名称配额: 限制某个目录下，文件的个数
+			[-setQuota <quota> <dirname>...<dirname>]
+			[-clrQuota <dirname>...<dirname>]	
+			
+			hdfs dfs -mkdir /folder1
+			hdfs dfsadmin -setQuota 3 /folder1
+			
+			实际是：N-1
+			
+		
+		（2）空间配额: 限制某个目录下，文件的大小
+			[-setSpaceQuota <quota> [-storageType <storagetype>] <dirname>...<dirname>]
+			[-clrSpaceQuota [-storageType <storagetype>] <dirname>...<dirname>]		
+			
+			hdfs dfs -mkdir /folder2
+			
+			设置空间配额：1M
+			hdfs dfsadmin -setSpaceQuota 1M /folder2
+			
+			错误：
+			The DiskSpace quota of /folder2 is exceeded: quota = 1048576 B = 1 MB but diskspace consumed = 134217728 B = 128 MB
+			
+			注意：设置的值一定不能小于128M
+				
+	4、安全模式：safemode
+		（*）HDFS启动的过程中，经历安全模式
+		（*）参考讲义：P23
+		
+	5、简介：HDFS的集群
+		（1）联盟Federation
+		（2）HA
+
+五、HDFS的底层原理
+	1、代理对象：Java Proxy
+		（*）来源：客户端得到的是NameNodeProxies（NameNode代理对象）
+		（*）是包装设计模式，用来增强类或者方法的功能
+		（*）代理对象的应用场景：数据库的连接池（JDBC）
+			(1) BDCP
+			(2) C3P0
+			
+		（*）搭建MySQL数据库
+				  tar -xvf mysql-5.7.19-1.el7.x86_64.rpm-bundle.tar
+		
+				在虚拟机上安装MySQL：
+				yum remove mysql-libs 
+				rpm -ivh mysql-community-common-5.7.19-1.el7.x86_64.rpm
+				rpm -ivh mysql-community-libs-5.7.19-1.el7.x86_64.rpm
+				rpm -ivh mysql-community-client-5.7.19-1.el7.x86_64.rpm
+				rpm -ivh mysql-community-server-5.7.19-1.el7.x86_64.rpm
+				rpm -ivh mysql-community-devel-5.7.19-1.el7.x86_64.rpm  （可选）
+							
+							启动MySQL：service mysqld start
+							或者：systemctl start mysqld.service
+
+							查看root用户的密码：cat /var/log/mysqld.log | grep password
+							登录后修改密码：alter user 'root'@'localhost' identified by 'Welcome_1';
+
+				MySQL数据库的配置：
+				创建一个新的数据库：create database hive;
+				创建一个新的用户：
+				create user 'hiveowner'@'%' identified by 'Welcome_1';
+				给该用户授权
+							   grant all on hive.* TO 'hiveowner'@'%'; 
+							   grant all on hive.* TO 'hiveowner'@'localhost' identified by 'Welcome_1';			
+
+							   
+	2、什么是RPC？ remote procedure call 远程过程调用（协议）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

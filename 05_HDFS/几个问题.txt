@@ -1,0 +1,15 @@
+
+
+几个问题：
+1、写错了：仔细
+
+2、网卡的问题：仅主机模式，vmnet1（一定不要使用自动分配）
+
+3、启动Hadoop的问题：没有NameNode、DataNode等等
+	学会看日志： HADOOP_HOME/logs
+	问题：namenode没有启动 -----> 后缀：.log文件
+		vi hadoop-root-namenode-bigdata111.log
+		到最后：vi快捷键  shift+g
+
+4、访问不了网页:50070、8088网页
+	不能使用IE，推荐火狐、Google浏览器

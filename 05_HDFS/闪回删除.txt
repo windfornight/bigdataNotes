@@ -1,0 +1,36 @@
+SQL> select * from student;
+select * from student
+              *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+SQL> select * from BIN$WA/yb4j1lBHgUAB/AQAwVQ==$0;
+select * from BIN$WA/yb4j1lBHgUAB/AQAwVQ==$0
+                    *
+ERROR at line 1:
+ORA-00933: SQL command not properly ended
+
+
+SQL> select * from "BIN$WA/yb4j1lBHgUAB/AQAwVQ==$0";
+
+        id name              age
+---------- ---------- ----------
+         1 Tom                23
+         2 Mary               24
+
+SQL> show recyclebin;
+ORIGINAL NAME    RECYCLEBIN NAME                OBJECT TYPE  DROP TIME
+---------------- ------------------------------ ------------ -------------------
+STUDENT          BIN$WA/yb4j1lBHgUAB/AQAwVQ==$0 TABLE        2017-09-01:01:26:38
+SQL> flashback table student to before drop;
+
+Flashback complete.
+
+SQL> show recyclebin;
+SQL> select * from student;
+
+        id name              age
+---------- ---------- ----------
+         1 Tom                23
+         2 Mary               24
