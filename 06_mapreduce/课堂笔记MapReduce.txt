@@ -1,0 +1,85 @@
+
+
+第六章：MapReduce
+
+问题：
+1、清空HDFS的回收站
+
+	-expunge
+	
+	Permanently delete files in checkpoints older than the retention threshold from trash directory, and create new checkpoint.
+
+
+2、课程回看
+
+
+=====================================
+一、课程概述
+
+	依赖jar包
+	  $HADOOP_HOME/share/hadoop/common
+	  $HADOOP_HOME/share/hadoop/common/lib
+	  $HADOOP_HOME/share/hadoop/mapreduce
+	  $HADOOP_HOME/share/hadoop/mapreducel/lib
+
+二、MapReduce编程基础
+	案例一
+	1、分析WordCount的数据处理的过程（流程  P28） ----> 重要
+	2、开发自己的WordCount程序
+	
+	案例二：员工表
+	3、分析：求每个部门的工资总额数据的处理过程  SQL:  select deptno,sum(sal) from emp group by deptno;
+	4、开发实现自己的MapReduce
+
+三、MapReduce的特性
+	1、序列化：接口Writable
+	           一个类实现了这个接口，该类的对象就可以作为key value(Map和Reduce的输入和输出)
+			   注意：序列化的顺序，一定要跟反序列的顺序一样
+			   
+			   
+			   
+			复习：Java序列化:接口 
+				如果一个类实现了Serializable接口，该类的对象可以作为InputStream（反序列化）和OutputStream对象（序列化）
+			   
+	2、排序：（1）基本数据类型：数字    ： 升序
+	                            字符串  ： 字典顺序
+			 （2）对象的排序： 按照员工的部门号、薪水排序
+			                   select * from emp order by deptno,sal;
+							   
+	3、分区：（1）什么分区
+			 （2）Demo：按照员工的部门号进行分区
+			 
+	4、合并（Combiner）：在Mapper端，先执行一次Reducer
+	                      减少Mapper输出到Reduce的数据量
+
+四、MapReduce的核心: shuffle 洗牌
+
+五、MapReduce编程案例
+	1、数据去重：distinct
+	2、多表查询：部门表、员工表
+		（1）复习：笛卡尔积
+		（2）等值连接
+		（3）自连接
+		
+	3、使用MapReduce实现倒排索引
+	4、使用MRUnit进行单元测试
+
+六、第一个阶段小结
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
