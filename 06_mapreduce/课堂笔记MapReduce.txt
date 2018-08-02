@@ -3,7 +3,9 @@
 第六章：MapReduce
 
 问题：
-1、清空HDFS的回收站
+1、偏移量是什么？
+	k1是这一行在文本文件中的位置（字节数）
+	举例
 
 	-expunge
 	
@@ -36,35 +38,84 @@
 	           一个类实现了这个接口，该类的对象就可以作为key value(Map和Reduce的输入和输出)
 			   注意：序列化的顺序，一定要跟反序列的顺序一样
 			   
-			   
-			   
 			复习：Java序列化:接口 
 				如果一个类实现了Serializable接口，该类的对象可以作为InputStream（反序列化）和OutputStream对象（序列化）
 			   
-	2、排序：（1）基本数据类型：数字    ： 升序
-	                            字符串  ： 字典顺序
-			 （2）对象的排序： 按照员工的部门号、薪水排序
-			                   select * from emp order by deptno,sal;
-							   
-	3、分区：（1）什么分区
-			 （2）Demo：按照员工的部门号进行分区
+	2、排序： 复习：SQL的排序: order by语句
+				（*） order by 后面 + 列名、表达式、别名、序号
+				      select * from emp order by sal;
+					  select empno,ename,sal,sal*12 from emp order by sal*12;
+					  select empno,ename,sal,sal*12 annlsal from emp order by annlsal;
+					  select empno,ename,sal,sal*12 annlsal from emp order by 4;
+				（*）order by + 多个列
+						select * from emp order by deptno desc,sal desc;
+						order by 作用后面所有的列
+						desc 离他最近的列
+						
+				（*）补充一点：查询员工信息，按照奖金排序
+						降序排序，一定要把null值排在最后
+						select * from emp order by comm desc nulls last;
+						
+				（*）问题：order by后得到的表，是原来的表吗？(不是，order by执行后，会产生一张临时表)
+			
+			MapReduce排序：重要：按照key2（数字、字符串、对象）进行排序
+	
+			 （1）基本数据类型：数字    ： 升序
+								举例：查询员工的薪水，按照升序排序
+								降序：重写一个比较器
 			 
-	4、合并（Combiner）：在Mapper端，先执行一次Reducer
+	                            字符串  ： 字典顺序
+								举例：WordCount单词计数
+								
+			 （2）对象的排序： 实现一个接口：WritableComparable
+								
+								Demo 1:一个列的排序
+								Demo 2:多个列排序
+									   按照员工的部门号、薪水排序
+									   select * from emp order by deptno,sal;
+							   
+	3、分区：（1）什么分区: partition
+					(*) 以Oracle数据库为例，解释什么是分区
+					(*) 什么是Hash分区
+	
+			 （2）MapReduce的分区（输出文件）
+				    (*) 默认情况下，MapReduce只有一个分区
+					(*) 如果自定义分区，根据Map的输出<k2,v2>来建立分区
+			 
+			      Demo：按照员工的部门号进行分区
+			 
+	4、合并（Combiner）： 是一种特殊Reducer
+	                      在Mapper端，先执行一次Reducer   -----> 提高效率
 	                      减少Mapper输出到Reduce的数据量
+						  
+						  需要注意的问题：一定要谨慎使用Combiner
+						（*）有些情况不能使用Combiner ---->  举例：求平均值
+						（*）保证引入Combiner以后，不能改变原来的逻辑
+						Error: java.io.IOException: wrong value class: class org.apache.hadoop.io.DoubleWritable is not class org.apache.hadoop.io.IntWritable
+						     
+							 留个问题：如何保证Combiner的引入不改变原来的逻辑？ ---> 使用MapReduce实现倒排索引
 
 四、MapReduce的核心: shuffle 洗牌
 
-五、MapReduce编程案例
+五、MapReduce编程案例-------> 更重要：一套方法（授人予鱼 不如授人予渔）
 	1、数据去重：distinct
+		复习：distinct 作用于后面所有的列
+		
 	2、多表查询：部门表、员工表
 		（1）复习：笛卡尔积
-		（2）等值连接
+		（2）等值连接： 查询员工信息，要求：员工姓名、部门名称
+
+				select d.dname,e.ename
+				from emp e,dept d
+				where e.deptno=d.deptno
+		
 		（3）自连接
 		
 	3、使用MapReduce实现倒排索引
+	
 	4、使用MRUnit进行单元测试
 
-六、第一个阶段小结
+六、第一个阶段小结：HDFS、MapReduce
 
 
 
