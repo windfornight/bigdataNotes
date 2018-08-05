@@ -125,6 +125,29 @@
 	   Eclipse使用Hadoop的插件
 
 六、第一个阶段小结：HDFS、MapReduce
+	1、什么是大数据？核心：数据存储HDFS、数据计算MapReduce
+	2、数据仓库：就是一个数据库
+	3、Google三篇论文：GFS、MapReduce、BigTable
+	4、搭建Hadoop的环境
+		（1）免密码登录：不对称加密
+		（2）Hadoop的目录结构
+		（3）本地模式：没有HDFS、只能测试MapReduce程序
+		（4）伪分布模式：具备Hadoop所有功能
+		（5）全分布模式：至少3台
+	5、HDFS
+		（1）体系结构：NameNode、DataNode、SecondaryNameNode
+		（2）fsimage、edits文件
+		（3）原理：上传、下载过程
+		（4）操作：命令行、Java API、Web Console（50070、50090）
+		（5）功能：回收站、快照、配额（名称、空间）、安全模式
+		（6）底层原理：RPC、代理对象
+		
+	6、MapReduce
+		（1）重要：数据处理的过程
+		（2）序列化、排序、分区、合并
+		（3）核心：Shuffle
+		（4）举例：去重、多表查询、倒排索引
+		（5）MR单元测试
 
 
 
