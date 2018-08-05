@@ -7,14 +7,6 @@
 	k1是这一行在文本文件中的位置（字节数）
 	举例
 
-	-expunge
-	
-	Permanently delete files in checkpoints older than the retention threshold from trash directory, and create new checkpoint.
-
-
-2、课程回看
-
-
 =====================================
 一、课程概述
 
@@ -109,11 +101,28 @@
 				from emp e,dept d
 				where e.deptno=d.deptno
 		
-		（3）自连接
+		（3）自连接: 通过表的别名，将同一张表看成多张表
+			（*）什么是自连接？
+				查询员工信息：显示：老板的名字  员工的名字
+				
+				select 老板姓名,员工的姓名
+				from b,e
+				where 老板的员工号=员工的老板号
+				
+				select b.ename "Boss",e.ename "Employee"			
+				from emp b,emp e	
+				where b.empno=e.mgr;
+				
+				如何得到跟MR一样的结果呢？ 提示：组函数（多行函数）  wm_concat 行转列
+				
+				问题：思考自连接操作存在什么问题吗？ ----> 不适合操作大表  ---> 层次查询（数据满足是一棵树的时候）
 		
 	3、使用MapReduce实现倒排索引
+		（*）复习：倒排索引
 	
-	4、使用MRUnit进行单元测试
+	4、使用MRUnit进行单元测试:  注意：（1）需要把mockito-all-1.8.5.jar从Build Path中去掉
+	                                    （2）需要windows的工具
+	   Eclipse使用Hadoop的插件
 
 六、第一个阶段小结：HDFS、MapReduce
 
